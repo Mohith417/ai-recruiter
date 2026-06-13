@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  JOB_SEEKER
+  RECRUITER
+  HR_MANAGER
+  INTERVIEWER
+  ADMIN
+  COMPANY
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  role      Role     @default(JOB_SEEKER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  jobs      Job[]    @relation("JobOwner")
+  applications Application[]
+  candidates Candidate[]
+  audits    AuditLog[]
+  interviews Interview[]
+}
+
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+  jobs  Job[]
+}
+
+model Job {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  location    String?
+  salaryMin   Int?
+  salaryMax   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  embedding   Json?
+
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  owner     User     @relation("JobOwner", fields: [ownerId], references: [id])
+  ownerId   String
+
+  applications Application[]
+  candidates   Candidate[]
+  interviews   Interview[]
+}
+
+model Application {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  job   Job    @relation(fields: [jobId], references: [id])
+  jobId String
+
+  applicant User @relation(fields: [applicantId], references: [id])
+  applicantId String
+
+  stage String @default("APPLIED") // applied/screened/interview/offer/hired
+
+  // Phase 2: AI enrichment
+  matchScore Int?
+  aiNotes    String?
+}
+
+model Candidate {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  name        String?
+  email       String?
+  // Optional: candidates can be created manually without a resume link.
+  resumeFileUrl String?
+  status      String @default("PARSED")
+  resumeText  String?
+  embedding   Json?
+
+  owner     User   @relation(fields: [ownerId], references: [id])
+  ownerId   String
+
+  job     Job?    @relation(fields: [jobId], references: [id])
+  jobId   String?
+
+  cultureFitScore     Int?
+  cultureFitRationale String?
+  interviews          Interview[]
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  actor     User     @relation(fields: [actorId], references: [id])
+  actorId   String
+
+  action    String
+  entity    String
+  entityId  String?
+  meta      Json?
+}
+
+model Interview {
+  id              String   @id @default(uuid())
+  candidateId     String
+  candidate       Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobId           String
+  job             Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  ownerId         String
+  owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  scheduledAt     DateTime
+  durationMinutes Int      @default(30)
+  interviewerName String?
+  notes           String?
+  status          String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

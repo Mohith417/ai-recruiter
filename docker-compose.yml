@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: airecruiter
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    # Ensure Prisma Client is regenerated when schema changes (bind mount on Windows).
+    command: sh -lc "npx prisma generate && npx prisma db push && npm run dev"
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/airecruiter?schema=public
+      REDIS_URL: redis://redis:6379
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_JWT_AUD: ${SUPABASE_JWT_AUD:-authenticated}
+      DEV_AUTH_BYPASS: "false"
+      # Better file watching on Windows bind mounts
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    image: airecruiter-backend:latest
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    # IMPORTANT: don't run `prisma db push` here.
+    # Backend service already runs it, and running it twice concurrently can crash with Postgres type conflicts.
+    command: sh -lc "npx prisma generate && npm run worker"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/airecruiter?schema=public
+      REDIS_URL: redis://redis:6379
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_JWT_AUD: ${SUPABASE_JWT_AUD:-authenticated}
+      DEV_AUTH_BYPASS: "false"
+      CHOKIDAR_USEPOLLING: "true"
+    depends_on:
+      - postgres
+      - redis
+
+  ml_service:
+    build:
+      context: ./ml_service
+    environment:
+      ML_SERVICE_PORT: 8000
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:

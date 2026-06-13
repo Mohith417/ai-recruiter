@@ -1,0 +1,40 @@
+# General
+.DS_Store
+*.log
+.uploads/
+
+# Env
+**/.env
+
+# Node
+**/node_modules/
+**/dist/
+
+# Prisma
+**/.prisma/
+
+# Flutter / Dart
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/build/
+**/.packages
+**/.pub-cache/
+
+# IDE
+.idea/
+.vscode/
+
+
+# AI Tools
+.antigravity-ide/
+.gemini/
+.trae/
+.cagent/
+GEMINI.md
+.void-editor/
+.continue/
+.copilot/
+.codeium/
+.cursor/
+

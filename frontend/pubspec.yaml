@@ -1,0 +1,52 @@
+name: recruitment_app
+description: A high-performance, AI-driven recruitment and talent management platform.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State / navigation / models
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.2.7
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # UI polish
+  flutter_animate: ^4.5.0
+  shimmer: ^3.0.0
+  lottie: ^3.1.2
+  rive: ^0.13.14
+  google_fonts: ^6.2.1
+
+  # Utilities
+  intl: ^0.19.0
+  dio: ^5.7.0
+  flutter_dotenv: ^5.1.0
+  uuid: ^4.5.1
+  supabase_flutter: ^2.8.3
+  file_picker: ^8.1.7
+  shared_preferences: ^2.5.5
+  socket_io_client: ^3.0.2
+  fl_chart: ^0.69.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/lottie/
+    - assets/rive/
+    - assets/images/
