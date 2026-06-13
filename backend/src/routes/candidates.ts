@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { z } from 'zod';
 
-import { prisma } from '../lib/prisma.js';
+import { prisma, Role } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 import { emitToUser } from '../lib/socket.js';
 
 export const candidatesRouter = Router();
+
+const recruiterRoles = [Role.RECRUITER, Role.HR_MANAGER, Role.ADMIN, Role.COMPANY];
 
 // Express v4 does not automatically catch async errors.
 // This wrapper forwards rejected promises to the error middleware.
@@ -88,6 +91,7 @@ const updateCandidateSchema = z
 candidatesRouter.get(
   '/candidates',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const rawJobId = typeof req.query.jobId === 'string' ? req.query.jobId.trim() : undefined;
     
@@ -163,6 +167,7 @@ candidatesRouter.get(
 candidatesRouter.get(
   '/candidates/search',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
     const rawJobId = typeof req.query.jobId === 'string' ? req.query.jobId.trim() : undefined;
@@ -359,6 +364,7 @@ function keywordSimilarity(query: string, text: string): number {
 candidatesRouter.get(
   '/candidates/:id',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const userId = req.auth!.userId;
     const { id } = req.params;
@@ -435,6 +441,7 @@ candidatesRouter.get(
 candidatesRouter.delete(
   '/candidates/:id',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
   const deleted = await prisma.candidate.deleteMany({
     where: { id: req.params.id, ownerId: req.auth!.userId },
@@ -477,6 +484,7 @@ candidatesRouter.delete(
 candidatesRouter.patch(
   '/candidates/:id',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
   const parsed = updateCandidateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -526,6 +534,7 @@ candidatesRouter.patch(
 candidatesRouter.post(
   '/candidates',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
   const parsed = createCandidateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -600,6 +609,7 @@ candidatesRouter.post(
 candidatesRouter.patch(
   '/candidates/:id/status',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const parsed = updateCandidateStatusSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -698,6 +708,7 @@ const evaluateCultureFitSchema = z.object({
 candidatesRouter.post(
   '/candidates/:id/culture-fit',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const parsed = evaluateCultureFitSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });

@@ -1,7 +1,8 @@
 import { Router } from 'express';
 
-import { prisma } from '../lib/prisma.js';
+import { prisma, Role } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 
 export const dashboardRouter = Router();
 
@@ -11,6 +12,8 @@ const asyncRoute =
   (fn: (req: any, res: any, next: any) => Promise<any>) =>
   (req: any, res: any, next: any) =>
     Promise.resolve(fn(req, res, next)).catch(next);
+
+const recruiterRoles = [Role.RECRUITER, Role.HR_MANAGER, Role.ADMIN, Role.COMPANY];
 
 /**
  * @openapi
@@ -26,6 +29,7 @@ const asyncRoute =
 dashboardRouter.get(
   '/dashboard/stats',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const userId = req.auth!.userId;
     const rawJobId = typeof req.query.jobId === 'string' ? req.query.jobId.trim() : undefined;
@@ -98,6 +102,7 @@ dashboardRouter.get(
 dashboardRouter.get(
   '/dashboard/funnel',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const userId = req.auth!.userId;
     const rawJobId = typeof req.query.jobId === 'string' ? req.query.jobId.trim() : undefined;
@@ -180,6 +185,7 @@ dashboardRouter.get(
 dashboardRouter.get(
   '/dashboard/activity-timeline',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const userId = req.auth!.userId;
     const rawJobId = typeof req.query.jobId === 'string' ? req.query.jobId.trim() : undefined;

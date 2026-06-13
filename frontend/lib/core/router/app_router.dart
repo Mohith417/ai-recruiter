@@ -40,7 +40,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path == '/settings' ||
             path == '/onboarding' ||
             path == '/login';
-        if (!isAllowed) {
+        
+        // Block candidates from recruiter-only paths like /candidates, /pipeline, /search, /interviews
+        final isRecruiterOnly = path == '/candidates' || 
+            path.startsWith('/candidates/') || 
+            path == '/pipeline' || 
+            path == '/search' || 
+            path == '/interviews' || 
+            path.startsWith('/interviews/') ||
+            path == '/jobs/new';
+
+        if (!isAllowed || isRecruiterOnly) {
           return '/dashboard';
         }
       }

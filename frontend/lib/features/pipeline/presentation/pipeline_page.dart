@@ -281,7 +281,6 @@ class _PipelinePageState extends ConsumerState<PipelinePage> {
       }
     }
 
-    final asyncCandidates = ref.watch(candidatesByJobProvider(jobId));
     final items = asyncCandidates.valueOrNull ?? const <Candidate>[];
     final isLoading = asyncCandidates.isLoading && items.isEmpty;
     final isActuallyRefreshing = asyncCandidates.isRefreshing || (asyncCandidates.isLoading && items.isNotEmpty);

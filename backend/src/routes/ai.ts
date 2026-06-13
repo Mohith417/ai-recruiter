@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { z } from 'zod';
 
-import { prisma } from '../lib/prisma.js';
+import { prisma, Role } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 import { aiQueue } from '../queues/ai.js';
 
 export const aiRouter = Router();
+
+const recruiterRoles = [Role.RECRUITER, Role.HR_MANAGER, Role.ADMIN, Role.COMPANY];
 
 const resumeParseSchema = z.object({
   // Swagger / PowerShell users sometimes accidentally wrap URLs with backticks.
@@ -36,7 +39,7 @@ const resumeParseSchema = z.object({
  *       202:
  *         description: Accepted
  */
-aiRouter.post('/ai/resume/parse', requireAuth, async (req, res) => {
+aiRouter.post('/ai/resume/parse', requireAuth, requireRole(recruiterRoles), async (req, res) => {
   const parsed = resumeParseSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 

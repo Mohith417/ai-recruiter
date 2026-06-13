@@ -58,13 +58,6 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       });
     }
 
-    if (user.role === Role.JOB_SEEKER && provider !== 'google') {
-      return res.status(403).json({ error: 'Candidates must authenticate using Google Sign-In' });
-    }
-    if (user.role === Role.RECRUITER && provider === 'google') {
-      return res.status(403).json({ error: 'Recruiters must log in with email and password' });
-    }
-
     req.auth = { userId: user.id, email: user.email, role: user.role };
     return next();
   } catch (e) {
@@ -108,13 +101,6 @@ export async function optionalAuth(req: Request, res: Response, next: NextFuncti
           data: { email, role: initialRole },
           select: { id: true, email: true, role: true },
         });
-      }
-
-      if (user.role === Role.JOB_SEEKER && provider !== 'google') {
-        return res.status(403).json({ error: 'Candidates must authenticate using Google Sign-In' });
-      }
-      if (user.role === Role.RECRUITER && provider === 'google') {
-        return res.status(403).json({ error: 'Recruiters must log in with email and password' });
       }
 
       req.auth = { userId: user.id, email: user.email, role: user.role };

@@ -50,7 +50,7 @@ authRouter.post('/auth/v1/signup', async (req, res) => {
 
 authRouter.post('/auth/v1/login', async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
     let user = await prisma.user.findUnique({
@@ -59,13 +59,7 @@ authRouter.post('/auth/v1/login', async (req, res) => {
     });
 
     if (!user) {
-      user = await prisma.user.create({
-        data: { 
-          email, 
-          role: (role === Role.JOB_SEEKER || role === Role.RECRUITER) ? role : Role.RECRUITER 
-        },
-        select: { id: true, email: true, role: true },
-      });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = await jwksManager.signToken({

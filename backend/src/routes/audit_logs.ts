@@ -1,8 +1,11 @@
 import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
+import { prisma, Role } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 
 export const auditLogsRouter = Router();
+
+const recruiterRoles = [Role.RECRUITER, Role.HR_MANAGER, Role.ADMIN, Role.COMPANY];
 
 // Wrapper to safely forward rejected promises to Express error handler
 const asyncRoute =
@@ -40,6 +43,7 @@ const asyncRoute =
 auditLogsRouter.get(
   '/audit-logs',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const logs = await prisma.auditLog.findMany({
       where: { actorId: req.auth!.userId },
@@ -65,6 +69,7 @@ auditLogsRouter.get(
 auditLogsRouter.delete(
   '/audit-logs',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const userId = req.auth!.userId;
 
@@ -101,6 +106,7 @@ auditLogsRouter.delete(
 auditLogsRouter.post(
   '/audit-logs/restore',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const userId = req.auth!.userId;
     const { logs } = req.body;
@@ -148,6 +154,7 @@ auditLogsRouter.post(
 auditLogsRouter.delete(
   '/audit-logs/:id',
   requireAuth,
+  requireRole(recruiterRoles),
   asyncRoute(async (req, res) => {
     const { id } = req.params;
     const userId = req.auth!.userId;

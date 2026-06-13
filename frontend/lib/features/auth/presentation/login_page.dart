@@ -50,7 +50,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         await notifier.signIn(
           _emailController.text.trim(),
           _passwordController.text,
-          role: _selectedRole,
         );
       }
     } catch (e) {
@@ -74,13 +73,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen<AppAuthState>(authNotifierProvider, (previous, next) {
       if (next.isAuthenticated && previous?.isAuthenticated != true) {
-        // Apply the selected role to the profile upon successful sign-in or sign-up.
-        // This ensures the "Sign in as" functionality works correctly for existing users.
-        ref.read(authNotifierProvider.notifier).updateProfile(role: _selectedRole).then((_) {
-          if (mounted) {
-            context.go('/dashboard');
-          }
-        });
+        if (mounted) {
+          context.go('/dashboard');
+        }
       }
     });
 

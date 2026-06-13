@@ -165,12 +165,11 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
     }
   }
 
-  Future<void> signIn(String email, String password, {String? role}) async {
+  Future<void> signIn(String email, String password) async {
     if (_client == null) {
       final res = await _dio.post('/auth/v1/login', data: {
         'email': email,
         'password': password,
-        if (role != null) 'role': role,
       });
       final data = res.data as Map<String, dynamic>;
       final token = data['token'] as String;

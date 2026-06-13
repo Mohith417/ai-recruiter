@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 
 import 'package:recruitment_app/features/candidates/application/candidates_providers.dart';
 import 'package:recruitment_app/features/candidates/domain/candidate.dart';
+import 'package:recruitment_app/features/auth/application/auth_providers.dart';
 import 'package:recruitment_app/shared/widgets/glass_card.dart';
 import 'package:recruitment_app/shared/widgets/shimmer_block.dart';
 
@@ -265,6 +266,9 @@ class CandidatesPage extends ConsumerWidget {
       );
     }
 
+    final auth = ref.watch(authNotifierProvider);
+    final isCandidate = auth.dbUser?.role == 'JOB_SEEKER';
+
     return RefreshIndicator.adaptive(
       onRefresh: refresh,
       child: CustomScrollView(
@@ -277,46 +281,48 @@ class CandidatesPage extends ConsumerWidget {
             backgroundColor: theme.scaffoldBackgroundColor,
             elevation: 0,
             actions: [
-              IconButton(
-                tooltip: 'Parse resume (AI)',
-                onPressed: openResumeParseDialog,
-                icon: const Icon(Icons.auto_awesome_rounded),
-              ),
-              IconButton(
-                tooltip: 'Search',
-                onPressed: () async {
-                  final ctrl = TextEditingController(text: query);
-                  final next = await showDialog<String>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Search'),
-                      content: TextField(
-                        controller: ctrl,
-                        autofocus: true,
-                        decoration: const InputDecoration(hintText: 'Type name/email/status...'),
+              if (!isCandidate) ...[
+                IconButton(
+                  tooltip: 'Parse resume (AI)',
+                  onPressed: openResumeParseDialog,
+                  icon: const Icon(Icons.auto_awesome_rounded),
+                ),
+                IconButton(
+                  tooltip: 'Search',
+                  onPressed: () async {
+                    final ctrl = TextEditingController(text: query);
+                    final next = await showDialog<String>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Search'),
+                        content: TextField(
+                          controller: ctrl,
+                          autofocus: true,
+                          decoration: const InputDecoration(hintText: 'Type name/email/status...'),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(''),
+                            child: const Text('Clear'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.of(ctx).pop(ctrl.text),
+                            child: const Text('Apply'),
+                          ),
+                        ],
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(''),
-                          child: const Text('Clear'),
-                        ),
-                        FilledButton(
-                          onPressed: () => Navigator.of(ctx).pop(ctrl.text),
-                          child: const Text('Apply'),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (next == null) return;
-                  ref.read(_candidatesQueryProvider.notifier).state = next;
-                },
-                icon: const Icon(Icons.search_rounded),
-              ),
-              IconButton(
-                tooltip: 'Add candidate',
-                onPressed: openCreateCandidateDialog,
-                icon: const Icon(Icons.person_add_alt_1_rounded),
-              ),
+                    );
+                    if (next == null) return;
+                    ref.read(_candidatesQueryProvider.notifier).state = next;
+                  },
+                  icon: const Icon(Icons.search_rounded),
+                ),
+                IconButton(
+                  tooltip: 'Add candidate',
+                  onPressed: openCreateCandidateDialog,
+                  icon: const Icon(Icons.person_add_alt_1_rounded),
+                ),
+              ],
               IconButton(
                 tooltip: 'Refresh',
                 onPressed: refresh,
