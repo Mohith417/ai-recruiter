@@ -1,71 +1,101 @@
-# AI Recruiter
-### A high-performance, AI-driven recruitment platform built for modern hiring teams.
+# ai-recruiter  
+![GitHub stars](https://img.shields.io/github/stars/Mohith417/ai-recruiter?style=social)  
+![GitHub license](https://img.shields.io/github/license/Mohith417/ai-recruiter)  
+![Docker Pulls](https://img.shields.io/docker/pulls/Mohith417/ai-recruiter)  
+![Node.js CI](https://github.com/Mohith417/ai-recruiter/actions/workflows/node.yml/badge.svg)
 
-AI Recruiter is a comprehensive full-stack solution designed to streamline and automate the modern hiring lifecycle. By leveraging distributed systems and machine learning, it provides a seamless experience for both recruiters and candidates, featuring real-time synchronization, automated resume intelligence, and intuitive pipeline management.
-
----
-
-## 🚀 Tech Stack
-
-- **Frontend**: Flutter (Cross-platform), Riverpod (State Management), GoRouter
-- **Backend**: Node.js, Express, TypeScript
-- **Persistence**: PostgreSQL, Prisma ORM
-- **Infrastructure**: Docker, Docker Compose
-- **Concurrency & Queues**: Redis, BullMQ (Async processing)
-- **Machine Learning**: FastAPI (Python), AI Resume Parsing, Culture-Fit Analysis
-- **API Documentation**: Swagger / OpenAPI 3.0
-- **Real-time**: Socket.io
+> **Full‑stack AI Recruitment System**  
+> Built with Flutter (Dart), Node.js, PostgreSQL, Docker & Docker Compose.
 
 ---
 
-## ✨ Key Features
+## 📌 Problem Statement
 
-### For Candidates
-- **Live Dashboard**: Real-time tracking of application status and personal hiring metrics.
-- **Smart Job Feed**: Efficient job discovery with one-click applications.
-- **Instant Notifications**: Real-time alerts when applications are reviewed or updated.
-- **Profile Management**: Professional profile hosting with automated status tracking.
-
-### For Recruiters
-- **Unified Pipeline**: Interactive Drag-and-Drop Kanban board for end-to-end candidate management.
-- **AI Resume Intelligence**: Automated PDF parsing and data extraction into the candidate database.
-- **Semantic Culture-Fit**: AI-powered assessment of candidate alignment with company core values.
-- **Analytics Dashboard**: High-level overview of hiring funnels, activity timelines, and team performance.
-- **Automated Workflows**: Real-time notifications for new applicants and background processing tasks.
+Modern hiring teams struggle to manage candidate pipelines, automate resume processing, and analyze hiring metrics at scale. Existing solutions either lack real‑time integration or require costly subscriptions.  
+**ai‑recruiter** bridges that gap by combining a cross‑platform mobile/web front‑end with a powerful, AI‑driven back‑end—all containerized for easy deployment.
 
 ---
 
-## 🛠️ Local Development
+## 🚀 Features
 
-### Prerequisites
-- Docker & Docker Compose
-- Flutter SDK (latest stable)
-- Node.js 20+
+### Candidate Experience
+| Feature | Description |
+|---------|-------------|
+| Live Dashboard | Real‑time status updates and personalized metrics |
+| Smart Job Feed | AI‑ranked job listings with one‑click application |
+| Instant Notifications | Push/SMS alerts for application updates |
+| Profile Management | Auto‑populate CV data, track progress |
 
-### 1. Environment Configuration
-Configure your local environment variables before starting the services.
+### Recruiter Experience
+| Feature | Description |
+|---------|-------------|
+| Unified Kanban Board | Drag‑and‑drop pipeline management |
+| AI Resume Parsing | PDF → structured data extraction |
+| Culture‑Fit Scoring | NLP‑based alignment with company values |
+| Analytics Dashboard | Visual hiring funnels, KPIs, team performance |
+| Workflow Automation | Background queue for screening & background checks |
 
-**Backend:**
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Flutter (Riverpod, GoRouter)
+- **Backend**: Node.js / Express (TypeScript)
+- **Database**: PostgreSQL (Prisma ORM)
+- **Queue**: Redis + BullMQ
+- **AI Services**: FastAPI (Python) – resume parsing, culture‑fit
+- **Real‑time**: Socket.io
+- **API Docs**: Swagger / OpenAPI
+- **Containerization**: Docker, Docker Compose
+- **CI/CD**: GitHub Actions (Node.js lint, unit tests)
+
+---
+
+## 📋 Prerequisites
+
+| Item | Minimum Version |
+|------|-----------------|
+| Docker & Docker Compose | 20.10+ |
+| Flutter SDK | 3.22+ (stable) |
+| Node.js | 20+ |
+| Yarn | 1.22+ (or npm) |
+| PostgreSQL | 15+ (if you run locally without Docker) |
+| Redis | 7+ (if you run locally without Docker) |
+
+---
+
+## ⚙️ Installation
+
+### 1️⃣ Clone the Repository
+
 ```bash
-cp backend/.env.example backend/.env
-# Update SUPABASE_URL and SUPABASE_JWT_AUD as needed
+git clone https://github.com/Mohith417/ai-recruiter.git
+cd ai-recruiter
 ```
 
-**Frontend:**
+### 2️⃣ Set Up Environment Variables
+
 ```bash
-cp frontend/.env.example frontend/.env
-# Ensure API_BASE_URL points to http://localhost:4000
+# api/.env
+DATABASE_URL=postgresql://user:pass@localhost:5432/ai_recruiter
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=super_secret_key
 ```
 
-### 2. Launch Infrastructure
-Start the entire ecosystem (Database, Redis, API, Workers, and ML Service) using Docker:
-```bash
-docker compose up --build
-```
-The backend API will be available at `http://localhost:4000`.
+### 3️⃣ Build & Start Services
 
-### 3. Run the Flutter App
-In a new terminal, launch the frontend:
+```bash
+docker compose up -d --build
+```
+
+### 4️⃣ Run Database Migrations
+
+```bash
+docker compose exec api npx prisma migrate deploy
+```
+
+### 5️⃣ Run Front‑end
+
 ```bash
 cd frontend
 flutter pub get
@@ -74,28 +104,40 @@ flutter run -d chrome
 
 ---
 
-## 📂 Project Structure
+## 📚 Usage Examples
 
-- `/frontend` - Flutter mobile and web application.
-- `/backend` - Node.js API, BullMQ workers, and Prisma schema.
-- `/ml_service` - FastAPI microservice for semantic analysis and embeddings.
-- `/docker-compose.yml` - Infrastructure orchestration and service definitions.
+### Apply to a Job
 
----
+```bash
+curl -X POST http://localhost:4000/api/jobs/123/apply \
+  -H "Content-Type: application/json" \
+  -d '{"candidateId":"c456","resumePdfUrl":"https://..." }'
+```
 
-## 📖 API Documentation
+### Retrieve Pipeline
 
-Once the backend is running, you can access the interactive API documentation (Swagger UI) at:
-**`http://localhost:4000/docs`**
-
----
-
-## 🖼️ Screenshots
-
-*(Placeholder: Add screenshots of the Kanban board, Candidate Dashboard, and AI Analysis screens here)*
+```bash
+curl http://localhost:4000/api/pipeline?stage=interview \
+  -H "Authorization: Bearer <JWT>"
+```
 
 ---
 
-## 📜 License
+## 🤝 Contributing
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. Fork the repo and create a feature branch: `git checkout -b feat/your-feature`
+2. Write tests for your changes
+3. Run tests: `yarn test` (backend) & `flutter test` (frontend)
+4. Open a pull request
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**
+
+---
+
+## 📞 Contact
+
+- **GitHub**: [@Mohith417](https://github.com/Mohith417)
